@@ -1,0 +1,451 @@
+html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Жизнь работника: от найма до несчастного случая</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background: white;
+            padding: 30px 20px;
+            color: #1e2a3a;
+        }
+
+        .timeline-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            padding: 30px 20px 40px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #0f2b3d;
+        }
+
+        .subtitle {
+            color: #4a5b6e;
+            margin-bottom: 40px;
+            border-left: 4px solid #00be76;
+            padding-left: 16px;
+        }
+
+        /* Шкала */
+        .timeline {
+            position: relative;
+            margin: 40px 0 60px;
+            padding: 20px 0;
+        }
+
+        .timeline-track {
+            position: relative;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin: 0 20px;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            height: 100%;
+            background: #00be76;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Маркеры событий */
+        .events {
+            position: relative;
+            min-height: 80px;
+        }
+
+        .event {
+            position: absolute;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100px;
+            transform: translateX(-50%);
+        }
+
+        .event:hover {
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .event-marker {
+            width: 16px;
+            height: 16px;
+            background: #00be76;
+            border: 3px solid white;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .event.active .event-marker {
+            background: #ff8c42;
+            transform: scale(1.3);
+            box-shadow: 0 0 0 3px rgba(255,140,66,0.3);
+        }
+
+        .event-date {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #2c3e4e;
+            margin-bottom: 4px;
+        }
+
+        .event-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1e4663;
+            line-height: 1.3;
+        }
+
+        /* Блок с чек-листом */
+        .checklist-panel {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 24px;
+            margin-top: 30px;
+            border: 1px solid #e2edf2;
+            transition: all 0.2s;
+        }
+
+        .checklist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #00be76;
+        }
+
+        .checklist-header h3 {
+            font-size: 1.4rem;
+            color: #0f2b3d;
+        }
+
+        .checklist-header .event-date-badge {
+            background: #eef2f5;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .checklist-items {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .checklist-item {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            border-left: 4px solid #00be76;
+        }
+
+        .item-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #1e4663;
+        }
+
+        .item-desc {
+            font-size: 0.9rem;
+            color: #2c3e4e;
+            margin-bottom: 12px;
+        }
+
+        .risk-warning {
+            background: #fff5e8;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .fine-amount {
+            font-weight: bold;
+            color: #d9534f;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 800px) {
+            .event {
+                position: relative;
+                transform: none;
+                width: auto;
+                text-align: left;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            .event:hover {
+                transform: none;
+            }
+            .event-marker {
+                margin: 0;
+                flex-shrink: 0;
+            }
+            .event-date, .event-title {
+                margin: 0;
+            }
+            .timeline-track {
+                display: none;
+            }
+            .events {
+                min-height: auto;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="timeline-container">
+    <h2>📅 Жизнь работника: от найма до несчастного случая</h2>
+    <div class="subtitle">Каждый пропущенный документ — риск для компании. Нажмите на событие, чтобы проверить чек-лист.</div>
+
+    <div class="timeline">
+        <div class="timeline-track">
+            <div class="timeline-progress" id="timelineProgress"></div>
+        </div>
+        <div class="events" id="eventsContainer"></div>
+    </div>
+
+    <div id="checklistPanel" class="checklist-panel">
+        <div class="checklist-header">
+            <h3>📋 Чек-лист</h3>
+            <span class="event-date-badge">Выберите событие на шкале</span>
+        </div>
+        <div id="checklistContent">
+            <p style="color: #6c7a89;">Нажмите на любой этап, чтобы увидеть, какие документы должны быть оформлены и какие штрафы грозят при их отсутствии.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Данные событий (даты и документы остаются теми же)
+        const events = [
+            {
+                id: 1,
+                date: "2025-05-05",
+                title: "Приём на работу / Вводный инструктаж",
+                description: "Вводный инструктаж (п. 6.1). Должен быть журнал регистрации с подписью работника.",
+                requiredDocs: [
+                    { name: "Журнал регистрации вводного инструктажа", risk: "Отсутствие подписи делает доказательство инструктажа невозможным", fineOfficer: 25000, fineEntity: 130000 },
+                    { name: "Программа вводного инструктажа", risk: "Нет утверждённой программы", fineOfficer: 15000, fineEntity: 110000 }
+                ]
+            },
+            {
+                id: 2,
+                date: "2025-05-06",
+                title: "Обучение в учебном центре",
+                description: "Обучение по охране труда (п. 6.4). Требуется протокол проверки знаний.",
+                requiredDocs: [
+                    { name: "Протокол проверки знаний", risk: "Нет протокола — обучение не засчитано", fineOfficer: 25000, fineEntity: 130000 },
+                    { name: "Удостоверение о прохождении обучения", risk: "Отсутствие документа", fineOfficer: 15000, fineEntity: 110000 }
+                ]
+            },
+            {
+                id: 3,
+                date: "2025-05-07",
+                title: "Первичный инструктаж + распоряжение о стажировке",
+                description: "Инструктаж на рабочем месте (п. 6.2) и распоряжение о стажировке (п. 6.3).",
+                requiredDocs: [
+                    { name: "Журнал инструктажа на рабочем месте", risk: "Нет подписи инструктируемого", fineOfficer: 25000, fineEntity: 130000 },
+                    { name: "Распоряжение о стажировке", risk: "Автоматически — нарушение порядка допуска", fineOfficer: 25000, fineEntity: 130000 }
+                ]
+            },
+            {
+                id: 4,
+                date: "2025-05-08",
+                title: "Стажировка",
+                description: "Стажировка (2–14 смен) с фиксацией в журнале.",
+                requiredDocs: [
+                    { name: "Журнал стажировки", risk: "Нет записей — стажировка не проведена", fineOfficer: 25000, fineEntity: 130000 },
+                    { name: "Программа стажировки", risk: "Отсутствие утверждённой программы", fineOfficer: 15000, fineEntity: 110000 }
+                ]
+            },
+            {
+                id: 5,
+                date: "2025-05-09",
+                title: "Распоряжение о допуске к самостоятельной работе",
+                description: "Оформляется после успешной стажировки.",
+                requiredDocs: [
+                    { name: "Приказ (распоряжение) о допуске", risk: "Нет документа — работник допущен незаконно", fineOfficer: 25000, fineEntity: 130000 }
+                ]
+            },
+            {
+                id: 6,
+                date: "2025-09-01",
+                title: "Дата несчастного случая (НС)",
+                description: "Проверяем, не истёк ли срок повторного инструктажа (6 месяцев).",
+                requiredDocs: [
+                    { name: "Повторный инструктаж (должен быть не позднее 05.11.2025)", risk: "Если инструктаж не проведён — нарушение", fineOfficer: 25000, fineEntity: 130000 },
+                    { name: "Журнал повторного инструктажа", risk: "Нет отметки", fineOfficer: 25000, fineEntity: 130000 }
+                ]
+            }
+        ];
+
+        const totalEvents = events.length;
+        const eventsContainer = document.getElementById('eventsContainer');
+        let activeId = events[0].id;
+
+        // Функция для расчёта процента по индексу (равномерно)
+        function getPercentByIndex(index) {
+            if (totalEvents === 1) return 50;
+            return (index / (totalEvents - 1)) * 100;
+        }
+
+        // Функция обновления позиций маркеров (равномерно)
+        function positionMarkers() {
+            const containerRect = eventsContainer.getBoundingClientRect();
+            const containerWidth = containerRect.width;
+            if (containerWidth === 0) return;
+            const leftOffset = 40;   // отступ слева (пиксели)
+            const rightOffset = 40;  // отступ справа
+            const usableWidth = containerWidth - leftOffset - rightOffset;
+            if (usableWidth <= 0) return;
+
+            events.forEach((event, idx) => {
+                const percent = getPercentByIndex(idx);
+                const leftPx = leftOffset + (percent / 100) * usableWidth;
+                const marker = document.querySelector(`.event[data-id="${event.id}"]`);
+                if (marker) {
+                    marker.style.left = `${leftPx}px`;
+                }
+            });
+        }
+
+        // Рендер событий
+        function renderEvents() {
+            eventsContainer.innerHTML = '';
+            events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = 'event';
+                eventDiv.setAttribute('data-id', event.id);
+                eventDiv.innerHTML = `
+                    <div class="event-marker"></div>
+                    <div class="event-date">${formatDate(event.date)}</div>
+                    <div class="event-title">${event.title}</div>
+                `;
+                eventDiv.addEventListener('click', () => showChecklist(event.id));
+                eventsContainer.appendChild(eventDiv);
+            });
+            // Позиционируем после того, как элементы добавлены
+            positionMarkers();
+        }
+
+        // Обновить прогресс-бар по индексу выбранного события
+        function updateProgress(eventId) {
+            const index = events.findIndex(e => e.id === eventId);
+            if (index === -1) return;
+            const percent = getPercentByIndex(index);
+            const progressBar = document.getElementById('timelineProgress');
+            progressBar.style.width = `${percent}%`;
+        }
+
+        // Активный класс
+        function setActiveEvent(eventId) {
+            document.querySelectorAll('.event').forEach(el => {
+                el.classList.remove('active');
+                if (el.getAttribute('data-id') == eventId) {
+                    el.classList.add('active');
+                }
+            });
+        }
+
+        // Показать чек-лист
+        function showChecklist(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+
+            activeId = eventId;
+            setActiveEvent(eventId);
+            updateProgress(eventId);
+
+            const panelHeader = document.querySelector('.checklist-header h3');
+            const dateBadge = document.querySelector('.checklist-header .event-date-badge');
+            panelHeader.innerHTML = `📋 Чек-лист: ${event.title}`;
+            dateBadge.textContent = formatDate(event.date);
+
+            const checklistContent = document.getElementById('checklistContent');
+            checklistContent.innerHTML = `
+                <div class="checklist-items">
+                    ${event.requiredDocs.map(doc => `
+                        <div class="checklist-item">
+                            <div class="item-title">📄 ${doc.name}</div>
+                            <div class="item-desc">${doc.risk}</div>
+                            <div class="risk-warning">
+                                <span>⚠️ Отсутствие документа → штраф:</span>
+                                <div>
+                                    <span class="fine-amount">Должностное лицо: ${doc.fineOfficer.toLocaleString('ru-RU')} ₽</span>
+                                    <span class="fine-amount" style="margin-left: 12px;">Юридическое лицо: ${doc.fineEntity.toLocaleString('ru-RU')} ₽</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <p style="margin-top: 20px; font-size: 0.8rem; color: #5a6e7c;">* Суммы штрафов указаны в максимальном размере по КоАП РФ (ст. 5.27.1).</p>
+            `;
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }).replace('г.', '').trim();
+        }
+
+        // Адаптация при изменении размера окна
+        function handleResize() {
+            if (window.innerWidth > 800) {
+                positionMarkers();
+            }
+        }
+        window.addEventListener('resize', handleResize);
+
+        // Инициализация
+        renderEvents();
+        if (events.length) {
+            showChecklist(events[0].id);
+        }
+        // Дополнительный вызов после загрузки для корректного позиционирования
+        setTimeout(() => {
+            if (window.innerWidth > 800) positionMarkers();
+        }, 100);
+    })();
+</script>
+</body>
+</html>
