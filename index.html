@@ -256,13 +256,13 @@
 
 <script>
     (function() {
-        // Данные событий (даты и документы остаются теми же)
+        // Обновлённые данные событий (изменены только заголовки и описания, списки документов не трогаем)
         const events = [
             {
                 id: 1,
                 date: "2025-05-05",
-                title: "Приём на работу / Вводный инструктаж",
-                description: "Вводный инструктаж (п. 6.1). Должен быть журнал регистрации с подписью работника.",
+                title: "Приём на работу / Вводный инструктаж / Начало обучения в УЦ",
+                description: "Приём сотрудника, проведение вводного инструктажа (п. 6.1) и направление на обучение в учебный центр.",
                 requiredDocs: [
                     { name: "Журнал регистрации вводного инструктажа", risk: "Отсутствие подписи делает доказательство инструктажа невозможным", fineOfficer: 25000, fineEntity: 130000 },
                     { name: "Программа вводного инструктажа", risk: "Нет утверждённой программы", fineOfficer: 15000, fineEntity: 110000 }
@@ -281,8 +281,8 @@
             {
                 id: 3,
                 date: "2025-05-07",
-                title: "Первичный инструктаж + распоряжение о стажировке",
-                description: "Инструктаж на рабочем месте (п. 6.2) и распоряжение о стажировке (п. 6.3).",
+                title: "Первичный инструктаж / Распоряжение о стажировке / Начало стажировки",
+                description: "Инструктаж на рабочем месте (п. 6.2), распоряжение о стажировке (п. 6.3) и начало стажировки.",
                 requiredDocs: [
                     { name: "Журнал инструктажа на рабочем месте", risk: "Нет подписи инструктируемого", fineOfficer: 25000, fineEntity: 130000 },
                     { name: "Распоряжение о стажировке", risk: "Автоматически — нарушение порядка допуска", fineOfficer: 25000, fineEntity: 130000 }
@@ -302,7 +302,7 @@
                 id: 5,
                 date: "2025-05-09",
                 title: "Распоряжение о допуске к самостоятельной работе",
-                description: "Оформляется после успешной стажировки.",
+                description: "Оформление допуска после успешной стажировки. Работник работает в праздничный день по графику.",
                 requiredDocs: [
                     { name: "Приказ (распоряжение) о допуске", risk: "Нет документа — работник допущен незаконно", fineOfficer: 25000, fineEntity: 130000 }
                 ]
@@ -323,19 +323,17 @@
         const eventsContainer = document.getElementById('eventsContainer');
         let activeId = events[0].id;
 
-        // Функция для расчёта процента по индексу (равномерно)
         function getPercentByIndex(index) {
             if (totalEvents === 1) return 50;
             return (index / (totalEvents - 1)) * 100;
         }
 
-        // Функция обновления позиций маркеров (равномерно)
         function positionMarkers() {
             const containerRect = eventsContainer.getBoundingClientRect();
             const containerWidth = containerRect.width;
             if (containerWidth === 0) return;
-            const leftOffset = 40;   // отступ слева (пиксели)
-            const rightOffset = 40;  // отступ справа
+            const leftOffset = 40;
+            const rightOffset = 40;
             const usableWidth = containerWidth - leftOffset - rightOffset;
             if (usableWidth <= 0) return;
 
@@ -349,7 +347,6 @@
             });
         }
 
-        // Рендер событий
         function renderEvents() {
             eventsContainer.innerHTML = '';
             events.forEach(event => {
@@ -364,11 +361,9 @@
                 eventDiv.addEventListener('click', () => showChecklist(event.id));
                 eventsContainer.appendChild(eventDiv);
             });
-            // Позиционируем после того, как элементы добавлены
             positionMarkers();
         }
 
-        // Обновить прогресс-бар по индексу выбранного события
         function updateProgress(eventId) {
             const index = events.findIndex(e => e.id === eventId);
             if (index === -1) return;
@@ -377,7 +372,6 @@
             progressBar.style.width = `${percent}%`;
         }
 
-        // Активный класс
         function setActiveEvent(eventId) {
             document.querySelectorAll('.event').forEach(el => {
                 el.classList.remove('active');
@@ -387,7 +381,6 @@
             });
         }
 
-        // Показать чек-лист
         function showChecklist(eventId) {
             const event = events.find(e => e.id === eventId);
             if (!event) return;
@@ -427,7 +420,6 @@
             return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }).replace('г.', '').trim();
         }
 
-        // Адаптация при изменении размера окна
         function handleResize() {
             if (window.innerWidth > 800) {
                 positionMarkers();
@@ -435,12 +427,10 @@
         }
         window.addEventListener('resize', handleResize);
 
-        // Инициализация
         renderEvents();
         if (events.length) {
             showChecklist(events[0].id);
         }
-        // Дополнительный вызов после загрузки для корректного позиционирования
         setTimeout(() => {
             if (window.innerWidth > 800) positionMarkers();
         }, 100);
